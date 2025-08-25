@@ -89,37 +89,38 @@ var init = function () {
 
     const config = { traceK: 0.4, timeDelta: 0.01 };
 
-    // ==== Text "vk miu miu bel" ====
-    const LOVE_TEXT = "vk miu miu bel";
-    let textAlpha = 0; // do trong suot
-    const lerp = (a, b, t) => a + (b - a) * t;
+ // ==== Text "vk miu miu bel" tren cung, font Fantasy ====
+const LOVE_TEXT = "vk miu miu bel";
 
-    function drawLoveText(syncValue) {
-        // syncValue (0..1) dong bo nhip tim
-        textAlpha = lerp(textAlpha, syncValue, 0.1);
+function drawLoveText(syncValue) {
+  // alpha theo nhip tim
+  const minA = 0.25;
+  const maxA = 0.95;
+  const alpha = minA + (maxA - minA) * syncValue;
 
-        ctx.save();
-        ctx.globalAlpha = textAlpha;
+  ctx.save();
+  ctx.globalAlpha = alpha;
 
-        const base = Math.min(width, height);
-        const fontSize = Math.max(24, Math.round(base * 0.08));
-        ctx.font = `${fontSize}px "Segoe UI", Roboto, Arial, sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+  const base = Math.min(width, height);
+  const fontSize = Math.max(28, Math.round(base * 0.09)); // chu to hon chut
+  ctx.font = `${fontSize}px Fantasy`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top"; // can tren
 
-        // hieu ung bong mo hong
-        ctx.shadowColor = "rgba(255, 0, 100, 0.7)";
-        ctx.shadowBlur = fontSize * 0.3;
+  // bong mo hong
+  ctx.shadowColor = "rgba(255, 0, 120, 0.7)";
+  ctx.shadowBlur = Math.round(fontSize * 0.35);
 
-        const grad = ctx.createLinearGradient(width/2 - fontSize, 0, width/2 + fontSize, 0);
-        grad.addColorStop(0, "#fff0f5");
-        grad.addColorStop(1, "#ff99cc");
-        ctx.fillStyle = grad;
+  const grad = ctx.createLinearGradient(width/2 - fontSize, 0, width/2 + fontSize, 0);
+  grad.addColorStop(0, "#ffe0f0");
+  grad.addColorStop(1, "#ff66cc");
+  ctx.fillStyle = grad;
 
-        const y = height * 0.65; // vi tri chu
-        ctx.fillText(LOVE_TEXT, width / 2, y);
-        ctx.restore();
-    }
+  const y = height * 0.08; // tren cung (khoang 8% chieu cao man hinh)
+  ctx.fillText(LOVE_TEXT, width / 2, y);
+
+  ctx.restore();
+}
 
     let time = 0;
     const loop = function () {
