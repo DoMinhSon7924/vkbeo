@@ -34,8 +34,7 @@ var init = function () {
   let height = canvas.height = koef * innerHeight;
   const rand = Math.random;
 
-  // Nền trắng ban đầu
-  ctx.fillStyle = "rgba(255,255,255,1)";
+  ctx.fillStyle = "rgba(0,0,0,1)";
   ctx.fillRect(0, 0, width, height);
 
   const heartPosition = function (rad) {
@@ -49,7 +48,7 @@ var init = function () {
   window.addEventListener('resize', function () {
     width = canvas.width = koef * innerWidth;
     height = canvas.height = koef * innerHeight;
-    ctx.fillStyle = "rgba(255,255,255,1)";
+    ctx.fillStyle = "rgba(0,0,0,1)";
     ctx.fillRect(0, 0, width, height);
   });
 
@@ -90,14 +89,16 @@ var init = function () {
 
   const config = { traceK: 0.4, timeDelta: 0.01 };
 
-  // ==== TEXT tren cung, font Fantasy, doi mau theo nhip tim ====
+  // ==== TEXT tren cung, font Fantasy ====
   const LOVE_TEXT = "vk miu miu bel";
+  let loggedOnce = false;
 
   function drawLoveText(syncValue) {
     // alpha nhap nhay theo nhip tim
-    const minA = 0.3, maxA = 1.0;
+    const minA = 0.25, maxA = 0.95;
     const alpha = minA + (maxA - minA) * syncValue;
 
+    // dam bao text khong bi blend voi hat
     ctx.globalCompositeOperation = 'source-over';
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -108,37 +109,22 @@ var init = function () {
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    // chon mau theo nhip tim: hong -> tim -> do
-    const colors = ["#ff99cc", "#9933ff", "#ff0000"];
-    const t = syncValue * 2; // 0..2
-    let c1, c2, frac;
-    if (t <= 1) {
-      c1 = colors[0]; c2 = colors[1]; frac = t;     // hong -> tim
-    } else {
-      c1 = colors[1]; c2 = colors[2]; frac = t - 1; // tim -> do
-    }
-
-    function hexToRgb(hex) {
-      const bigint = parseInt(hex.slice(1), 16);
-      return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
-    }
-    function mix(c1, c2, f) {
-      return [
-        Math.round(c1[0] + (c2[0] - c1[0]) * f),
-        Math.round(c1[1] + (c2[1] - c1[1]) * f),
-        Math.round(c1[2] + (c2[2] - c1[2]) * f),
-      ];
-    }
-    const rgb = mix(hexToRgb(c1), hexToRgb(c2), frac);
-    ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
-
-    // bong mo cung mau chu
-    ctx.shadowColor = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.6)`;
+    // bong mo de noi chu
+    ctx.shadowColor = "rgba(255, 0, 120, 0.75)";
     ctx.shadowBlur = Math.round(fontSize * 0.35);
 
-    const y = Math.round(height * 0.06); // tren cung
+    // to chu hong trang
+    const grad = ctx.createLinearGradient(width/2 - fontSize, 0, width/2 + fontSize, 0);
+    grad.addColorStop(0, "#ffe0f0");
+    grad.addColorStop(1, "#ff66cc");
+    ctx.fillStyle = grad;
+
+    // can tren cung (6% chieu cao)
+    const y = Math.round(height * 0.06);
     ctx.fillText(LOVE_TEXT, width / 2, y);
     ctx.restore();
+
+    if (!loggedOnce) { console.log("drawLoveText active"); loggedOnce = true; }
   }
 
   let time = 0;
@@ -146,11 +132,15 @@ var init = function () {
     const n = -Math.cos(time);
     pulse((1 + n) * 0.5, (1 + n) * 0.5);
 
+    // tang toc/lam cham giong code goc
     time += ((Math.sin(time)) < 0 ? 9 : (n > 0.8) ? 0.2 : 1) * config.timeDelta;
 
-    // nền trắng mờ để giữ vết kéo
-    ctx.fillStyle = "rgba(255,255,255,.1)";
+    // nen mo tao vet keo
+    ctx.fillStyle = "rgba(0,0,0,.1)";
     ctx.fillRect(0, 0, width, height);
+
+    // (tuy chon) lam hat sang hon 1 chut
+    // ctx.globalCompositeOperation = 'lighter';
 
     // cap nhat & ve hat
     for (i = e.length; i--;) {
@@ -191,8 +181,8 @@ var init = function () {
       }
     }
 
-    // ve chu tren cung
-    const syncValue = (1 + n) * 0.5;
+    // ve chu SAU CUNG de nam tren cung
+    const syncValue = (1 + n) * 0.5; // 0..1
     drawLoveText(syncValue);
 
     window.requestAnimationFrame(loop, canvas);
